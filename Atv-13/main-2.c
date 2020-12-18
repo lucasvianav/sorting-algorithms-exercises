@@ -19,17 +19,17 @@ void swapElements(point *vector, int i, int j){
     return;
 }
 
-void quickSort(point *vector, int leftIndex, int rightIndex, int x){
+void quickSort(point *vector, int leftIndex, int rightIndex){
     if(leftIndex < rightIndex){
-        float pivot = x ? vector[(int)((rightIndex+leftIndex)/2)].x : vector[(int)((rightIndex+leftIndex)/2)].y;
+        float pivot = vector[(int)((rightIndex+leftIndex)/2)].x;
         int left = leftIndex, right = rightIndex;
 
         while(1){
             // Selects elements from the left that are >= to the pivot
-            while(x ? (vector[left].x < pivot) : (vector[left].y < pivot)){ left++; }
+            while(vector[left].x < pivot){ left++; }
 
             // Selects elements from the right that are <= to the pivot
-            while(x ? (vector[right].x > pivot) : (vector[left].y > pivot)){ right--; }
+            while(vector[right].x > pivot){ right--; }
 
             // If the swapping the above selected elements is worth it, do it
             if(left < right){ swapElements(vector, left++, right--); } // And pass to the next element
@@ -40,8 +40,36 @@ void quickSort(point *vector, int leftIndex, int rightIndex, int x){
         }
 
         // Sorts the partitions
-        quickSort(vector, leftIndex, right, x);
-        quickSort(vector, right+1, rightIndex, x);
+        quickSort(vector, leftIndex, right);
+        quickSort(vector, right+1, rightIndex);
+    }
+
+    return;
+}
+
+void quickSortY(point *vector, int leftIndex, int rightIndex){
+    if(leftIndex < rightIndex){
+        float pivot = vector[(int)((rightIndex+leftIndex)/2)].y;
+        int left = leftIndex, right = rightIndex;
+
+        while(1){
+            // Selects elements from the left that are >= to the pivot
+            while(vector[left].y < pivot){ left++; }
+
+            // Selects elements from the right that are <= to the pivot
+            while(vector[right].y > pivot){ right--; }
+
+            // If the swapping the above selected elements is worth it, do it
+            if(left < right){ swapElements(vector, left++, right--); } // And pass to the next element
+
+            // If the swap is not worth it, the vector was successfully partitionted
+            else{ break; }
+
+        }
+
+        // Sorts the partitions
+        quickSort(vector, leftIndex, right);
+        quickSort(vector, right+1, rightIndex);
     }
 
     return;
@@ -70,19 +98,19 @@ float auxGetLowestDist(point *points, int leftIndex, int rightIndex){
         }
     }
 
-    quickSort(strip, 0, stripSize-1, 0);
+    quickSortY(strip, 0, stripSize-1);
 
-    for(int i = 0; i < stripSize; i++){
-        for(int j = i+1; j < stripSize && (strip[j].y - strip[i].y < distance); j++){
-            distance = min(distance, d(strip[i], strip[j]));
-        }
-    }
+    float div = (strip[0].x > points[leftIndex].x && strip[stripSize-1].x < points[rightIndex].x) 
+        ? auxGetLowestDist(strip, 0, stripSize-1) 
+        : -1;
 
-    return distance;
+    free(strip);
+
+    return min(distance, div);
 }
 
 float getLowestDist(point *points, int n){
-    quickSort(points, 0, n-1, 1);
+    quickSort(points, 0, n-1);
     return auxGetLowestDist(points, 0, n-1);
 }
 
